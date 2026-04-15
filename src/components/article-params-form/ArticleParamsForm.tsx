@@ -17,7 +17,6 @@ import { RadioGroup } from 'src/ui/radio-group';
 import { Select } from 'src/ui/select';
 import { Separator } from 'src/ui/separator';
 import { Text } from 'src/ui/text';
-import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 
 import styles from './ArticleParamsForm.module.scss';
 
@@ -35,12 +34,28 @@ export const ArticleParamsForm = ({
 		useState<ArticleStateType>(articleSettings);
 	const sidebarElementRef = useRef<HTMLDivElement>(null);
 
-	useOutsideClickClose({
-		isOpen: sidebarOpenState,
-		rootRef: sidebarElementRef,
-		onClose: () => setSidebarOpenState(false),
-		onChange: setSidebarOpenState,
-	});
+	// ИСПРАВЛЕНИЕ: обработчик клика только при открытом сайдбаре
+	useEffect(() => {
+		if (!sidebarOpenState) {
+			return;
+		}
+
+		const handleClickOutside = (event: MouseEvent) => {
+			const target = event.target as Node;
+			if (
+				sidebarElementRef.current &&
+				!sidebarElementRef.current.contains(target)
+			) {
+				setSidebarOpenState(false);
+			}
+		};
+
+		document.addEventListener('mousedown', handleClickOutside);
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [sidebarOpenState]);
 
 	useEffect(() => {
 		if (sidebarOpenState) {
