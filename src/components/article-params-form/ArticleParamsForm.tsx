@@ -22,70 +22,71 @@ import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 import styles from './ArticleParamsForm.module.scss';
 
 type ArticleParamsFormProps = {
-	settings: ArticleStateType;
-	onApply: (settings: ArticleStateType) => void;
+	articleSettings: ArticleStateType;
+	settingsApplier: (settings: ArticleStateType) => void;
 };
 
 export const ArticleParamsForm = ({
-	settings,
-	onApply,
+	articleSettings,
+	settingsApplier,
 }: ArticleParamsFormProps) => {
-	const [isOpen, setIsOpen] = useState(false);
-	const [tempSettings, setTempSettings] = useState<ArticleStateType>(settings);
-	const asideRef = useRef<HTMLDivElement>(null);
+	const [sidebarOpenState, setSidebarOpenState] = useState(false);
+	const [temporarySettingsData, setTemporarySettingsData] =
+		useState<ArticleStateType>(articleSettings);
+	const sidebarElementRef = useRef<HTMLDivElement>(null);
 
 	useOutsideClickClose({
-		isOpen,
-		rootRef: asideRef,
-		onClose: () => setIsOpen(false),
-		onChange: setIsOpen,
+		isOpen: sidebarOpenState,
+		rootRef: sidebarElementRef,
+		onClose: () => setSidebarOpenState(false),
+		onChange: setSidebarOpenState,
 	});
 
 	useEffect(() => {
-		if (isOpen) {
-			setTempSettings(settings);
+		if (sidebarOpenState) {
+			setTemporarySettingsData(articleSettings);
 		}
-	}, [isOpen, settings]);
+	}, [sidebarOpenState, articleSettings]);
 
-	const handleChange = <K extends keyof ArticleStateType>(
-		field: K,
-		value: ArticleStateType[K]
+	const changeFieldValue = <K extends keyof ArticleStateType>(
+		fieldName: K,
+		newValue: ArticleStateType[K]
 	) => {
-		setTempSettings((prev) => ({
-			...prev,
-			[field]: value,
+		setTemporarySettingsData((previousSettings) => ({
+			...previousSettings,
+			[fieldName]: newValue,
 		}));
 	};
 
-	const handleSubmit = (evt: FormEvent) => {
-		evt.preventDefault();
-		onApply(tempSettings);
-		setIsOpen(false);
+	const submitFormHandler = (event: FormEvent) => {
+		event.preventDefault();
+		settingsApplier(temporarySettingsData);
+		setSidebarOpenState(false);
 	};
 
-	const handleReset = (evt: FormEvent) => {
-		evt.preventDefault();
-		setTempSettings(defaultArticleState);
-		onApply(defaultArticleState);
-		setIsOpen(false);
+	const resetFormHandler = (event: FormEvent) => {
+		event.preventDefault();
+		setTemporarySettingsData(defaultArticleState);
+		settingsApplier(defaultArticleState);
+		setSidebarOpenState(false);
 	};
 
-	const handleToggle = () => {
-		setIsOpen((prev) => !prev);
+	const toggleSidebarHandler = () => {
+		setSidebarOpenState((previousState) => !previousState);
 	};
 
 	return (
 		<>
-			<ArrowButton isOpen={isOpen} onClick={handleToggle} />
+			<ArrowButton isOpen={sidebarOpenState} onClick={toggleSidebarHandler} />
 			<aside
-				ref={asideRef}
+				ref={sidebarElementRef}
 				className={clsx(styles.container, {
-					[styles.container_open]: isOpen,
+					[styles.container_open]: sidebarOpenState,
 				})}>
 				<form
 					className={styles.form}
-					onReset={handleReset}
-					onSubmit={handleSubmit}>
+					onReset={resetFormHandler}
+					onSubmit={submitFormHandler}>
 					<Text as='h2' weight={800} size={31} uppercase>
 						Задайте параметры
 					</Text>
@@ -93,9 +94,9 @@ export const ArticleParamsForm = ({
 					<Select
 						title='Шрифт'
 						options={fontFamilyOptions}
-						selected={tempSettings.fontFamilyOption}
+						selected={temporarySettingsData.fontFamilyOption}
 						onChange={(value: OptionType) =>
-							handleChange('fontFamilyOption', value)
+							changeFieldValue('fontFamilyOption', value)
 						}
 					/>
 
@@ -103,17 +104,19 @@ export const ArticleParamsForm = ({
 						title='Размер шрифта'
 						name='font-size'
 						options={fontSizeOptions}
-						selected={tempSettings.fontSizeOption}
+						selected={temporarySettingsData.fontSizeOption}
 						onChange={(value: OptionType) =>
-							handleChange('fontSizeOption', value)
+							changeFieldValue('fontSizeOption', value)
 						}
 					/>
 
 					<Select
 						title='Цвет шрифта'
 						options={fontColors}
-						selected={tempSettings.fontColor}
-						onChange={(value: OptionType) => handleChange('fontColor', value)}
+						selected={temporarySettingsData.fontColor}
+						onChange={(value: OptionType) =>
+							changeFieldValue('fontColor', value)
+						}
 					/>
 
 					<Separator />
@@ -121,18 +124,18 @@ export const ArticleParamsForm = ({
 					<Select
 						title='Цвет фона'
 						options={backgroundColors}
-						selected={tempSettings.backgroundColor}
+						selected={temporarySettingsData.backgroundColor}
 						onChange={(value: OptionType) =>
-							handleChange('backgroundColor', value)
+							changeFieldValue('backgroundColor', value)
 						}
 					/>
 
 					<Select
 						title='Ширина контента'
 						options={contentWidthArr}
-						selected={tempSettings.contentWidth}
+						selected={temporarySettingsData.contentWidth}
 						onChange={(value: OptionType) =>
-							handleChange('contentWidth', value)
+							changeFieldValue('contentWidth', value)
 						}
 					/>
 

@@ -8,15 +8,14 @@ import {
 	ArticleStateType,
 } from 'src/constants/articleProps';
 
-// Используем готовый файл стилей из src/styles/
 import styles from 'src/styles/index.module.scss';
 
 export const App = () => {
-	const [articleState, setArticleState] =
+	const [currentArticleSettingsData, setCurrentArticleSettingsData] =
 		useState<ArticleStateType>(defaultArticleState);
 
-	const handleApply = (newState: ArticleStateType) => {
-		setArticleState(newState);
+	const applySettingsHandler = (newSettings: ArticleStateType) => {
+		setCurrentArticleSettingsData(newSettings);
 	};
 
 	return (
@@ -24,14 +23,17 @@ export const App = () => {
 			className={clsx(styles.main)}
 			style={
 				{
-					'--font-family': articleState.fontFamilyOption.value,
-					'--font-size': articleState.fontSizeOption.value,
-					'--font-color': articleState.fontColor.value,
-					'--container-width': articleState.contentWidth.value,
-					'--bg-color': articleState.backgroundColor.value,
+					'--font-family': currentArticleSettingsData.fontFamilyOption.value,
+					'--font-size': currentArticleSettingsData.fontSizeOption.value,
+					'--font-color': currentArticleSettingsData.fontColor.value,
+					'--container-width': currentArticleSettingsData.contentWidth.value,
+					'--bg-color': currentArticleSettingsData.backgroundColor.value,
 				} as CSSProperties
 			}>
-			<ArticleParamsForm settings={articleState} onApply={handleApply} />
+			<ArticleParamsForm
+				articleSettings={currentArticleSettingsData}
+				settingsApplier={applySettingsHandler}
+			/>
 			<Article />
 		</main>
 	);
