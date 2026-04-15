@@ -27,3 +27,6 @@ declare module '*.module.sass' {
 	const classes: { [key: string]: string };
 	export default classes;
 }
+// добавил чтобы typescript не ругался
+declare module '*.css';
+declare module '*.scss';
